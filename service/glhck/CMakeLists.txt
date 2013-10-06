@@ -1,7 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-project(angelworks)
-
-add_subdirectory(lib)
+project(angelworks-service-glhck)
 
 include_directories(
   include
@@ -13,18 +11,12 @@ include_directories(
   ${Angelscript_SOURCE_DIR}/../../../add_on
 )
 
-file(GLOB SOURCES src/*.cpp src/**/*.cpp )
-add_definitions(-DGLHCK_KAZMATH_FLOAT -DUSE_SINGLE_PRECISION)
-list(APPEND CMAKE_CXX_FLAGS -std=c++11)
+file(GLOB SOURCES src/*.cpp)
 set(AS_ADDONS ${Angelscript_SOURCE_DIR}/../../../add_on/)
 
-add_library(angelworks 
+add_library(angelworks-service-glhck
     ${SOURCES}
-    ${AS_ADDONS}/scriptstdstring/scriptstdstring.cpp
     ${AS_ADDONS}/scriptarray/scriptarray.cpp
 )
-target_link_libraries(angelworks Angelscript)
 
-add_subdirectory(service)
-
-add_subdirectory(test)
+target_link_libraries(angelworks-service-glhck glhck)

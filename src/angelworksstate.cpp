@@ -1,9 +1,11 @@
 #include "angelworksstate.h"
 #include "scriptstdstring/scriptstdstring.h"
+#include "scriptarray/scriptarray.h"
 #include <iostream>
 #include <sstream>
 #include "ew/engine.h"
 #include "angelworksservice.h"
+#include "ew/renderphase.h"
 
 namespace
 {
@@ -43,9 +45,11 @@ AngelWorksState::AngelWorksState() : ew::State(),
   scriptEngine(asCreateScriptEngine(ANGELSCRIPT_VERSION)), scriptContext(nullptr),
   eventBus(), serviceFactories(), services()
 {
-  phases = {new ServicePhase(this, this), new EventPhase(this, this)};
+  phases = {new ServicePhase(this, this), new EventPhase(this, this), new ew::RenderPhase(this)};
+
   scriptEngine->SetMessageCallback(asFUNCTION(messageCallback), 0, asCALL_CDECL);
   RegisterStdString(scriptEngine);
+  RegisterScriptArray(scriptEngine, true);
   scriptEngine->RegisterGlobalFunction("void print(const string &in)", asFUNCTION(print), asCALL_CDECL);
   scriptEngine->RegisterGlobalFunction("void require(const string &in)", asMETHOD(AngelWorksState, require), asCALL_THISCALL_ASGLOBAL, this);
   scriptEngine->RegisterGlobalFunction("void register(?&in)", asMETHOD(AngelWorksState, registerObject), asCALL_THISCALL_ASGLOBAL, this);
@@ -106,6 +110,7 @@ void AngelWorksState::require(const std::string& name)
       AngelWorksService* service = serviceFactoryIter->second();
       service->registerToEngine(scriptEngine);
       service->setEventBus(&eventBus);
+      service->setState(this);
       services.insert(make_pair(name, service));
     }
   }
