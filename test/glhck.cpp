@@ -6,6 +6,7 @@
 #include "angelworksstate.h"
 #include "angelworksservice.h"
 #include "glhckservice.h"
+#include "timerservice.h"
 
 #include <iostream>
 
@@ -17,11 +18,17 @@ std::string const INIT_SCRIPT = R"(
       register(@this);
       @o = GlhckService.createCube(50);
       o.position = glhck::Vec3(400, 240, 0);
+      TimerService.setInterval(@this, 0.05);
     }
 
     ~Cube()
     {
       unregister(@this);
+    }
+
+    void onTimerEvent(TimerEvent e)
+    {
+      o.position = glhck::Vec3(o.position.x + 5, 240, 0);
     }
 
     glhck::Object@ o;
@@ -120,6 +127,7 @@ void gameloop(GLFWwindow* window)
 
   AngelWorksState angelWorksState;
   angelWorksState.registerAndRequireService<GlhckService>("glhck");
+  angelWorksState.registerAndRequireService<TimerService>("timer");
   angelWorksState.initialize(INIT_SCRIPT);
   engine.addState(0, &angelWorksState);
   engine.setState(0);
@@ -127,7 +135,7 @@ void gameloop(GLFWwindow* window)
   engine.run();
 
   double t0 = glfwGetTime();
-  while(engine.isRunning() && glfwGetTime() - t0 < 2)
+  while(engine.isRunning() && glfwGetTime() - t0 < 4)
   {
     engine.advance(1.0f/60.0f);
   }
