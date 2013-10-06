@@ -8,6 +8,7 @@
 #include "glhckservice.h"
 #include "timerservice.h"
 
+#include <boost/filesystem.hpp>
 #include <iostream>
 
 std::string const INIT_SCRIPT = R"(
@@ -17,8 +18,11 @@ std::string const INIT_SCRIPT = R"(
     {
       register(@this);
       @o = GlhckService.createCube(50);
-      o.position = glhck::Vec3(400, 240, 0);
-      TimerService.setInterval(@this, 0.05);
+
+      glhck::Text text(512,512);
+      uint font = text.setKakwafont();
+      @yay = GlhckService.createTextObject(text, font, 48, "YAYYY!!", glhck::defaultTextureParameters());
+      TimerService.setInterval(@this, 0.01);
     }
 
     ~Cube()
@@ -29,14 +33,33 @@ std::string const INIT_SCRIPT = R"(
     void onTimerEvent(TimerEvent e)
     {
       o.position = glhck::Vec3(o.position.x + 5, 240, 0);
+      o.rotation = glhck::Vec3(0, 0, o.rotation.z + 5);
+      yay.position = glhck::Vec3(o.position.x, o.position.y+90, 0);
+      yay.material.diffuse = glhck::Color(255, o.rotation.z, o.rotation.z, 255);
     }
 
     glhck::Object@ o;
+    glhck::Object@ yay;
   }
 
+  class Sprite
+  {
+    Sprite(glhck::Texture@ tex)
+    {
+      @o = GlhckService.createSprite(tex, 96, 96);
+      o.position = glhck::Vec3(400, 120, 0);
+    }
+    glhck::Object@ o;
+  }
 
   void init() {
     Cube cube;
+
+    glhck::TextureParameters textureParameters = glhck::defaultTextureSpriteParameters();
+    glhck::ImportImageParameters imageParameters = glhck::defaultImportImageParameters();
+    glhck::Texture tex("img/infantry_1.png", imageParameters, textureParameters);
+
+    Sprite sprite(@tex);
   }
 )";
 
@@ -69,6 +92,9 @@ class GlhckGLFWInterceptor : public ew::Interceptor<ew::Engine>
 
 int main(int argc, char** argv)
 {
+  std::cout << argv[0] << std::endl;
+  chdir(boost::filesystem::path(argv[0]).remove_leaf().c_str());
+
   if (!glfwInit())
     return EXIT_FAILURE;
 
@@ -115,9 +141,6 @@ void gameloop(GLFWwindow* window)
 {
   ew::Engine engine;
   glfwSetWindowUserPointer(window, &engine);
-
-  glhckColorb clearColor {128, 128, 128, 255};
-  glhckRenderClearColor(&clearColor);
 
   GLFWContext glfwContext = {window};
   engine.singletons.set<GLFWContext>(&glfwContext);

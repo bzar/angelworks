@@ -14,6 +14,9 @@ public:
   void render();
   void registerToEngine(asIScriptEngine* e);
   glhckObject* createCube(float const size);
+  glhckObject* createSprite(glhckTexture* texture, float width, float height);
+  glhckObject* createModel(std::string const& file, float size, const glhckImportModelParameters *importParams);
+  glhckObject* createTextObject(glhckText *text, unsigned int const font, float const size, std::string const& str, const glhckTextureParameters &parameters);
   void process(float delta);
 
 private:

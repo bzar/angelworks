@@ -12,12 +12,15 @@ public:
     int timerId;
   };
 
+  ~TimerService();
   void registerToEngine(asIScriptEngine* e);
   int setTimeout(void* ptr, int typeId, float dt);
   int setInterval(void* ptr, int typeId, float dt);
   void process(float delta);
 
 private:
+
+  int addTimer(void* ptr, int typeId, float dt, bool repeat);
   struct Timer
   {
     asIScriptObject* obj;
