@@ -105,7 +105,10 @@ void AngelWorksEventBus::processTargetedEvent(const AngelWorksEventBus::Event& e
   if(method != nullptr)
   {
     ctx->Prepare(method);
-    ctx->SetArgObject(0, e.obj);
+    if(method->GetParamCount() != 0)
+    {
+      ctx->SetArgObject(0, e.obj);
+    }
     ctx->SetObject(e.target);
     ctx->Execute();
   }
@@ -121,7 +124,10 @@ void AngelWorksEventBus::processBroadcastEvent(const AngelWorksEventBus::Event& 
     asIScriptFunction* method =objType->GetMethodByIndex(handler.methodIndex);
 
     ctx->Prepare(method);
-    ctx->SetArgObject(0, e.obj);
+    if(method->GetParamCount() != 0)
+    {
+      ctx->SetArgObject(0, e.obj);
+    }
 
     auto objRange = typeObjectMap.equal_range(handler.objectTypeId);
     for(auto j = objRange.first; j != objRange.second; ++j)
