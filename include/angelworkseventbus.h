@@ -4,6 +4,7 @@
 #include "angelscript.h"
 #include <vector>
 #include <unordered_map>
+#include "angelworksevent.h"
 
 class AngelWorksEventBus
 {
@@ -12,7 +13,7 @@ public:
   {
     typedef int ID;
     ID const typeId;
-    void* const obj;
+    AngelWorksEvent* const obj;
     asIScriptObject* target;
   };
 
@@ -22,6 +23,7 @@ public:
   void registerObject(asIScriptObject* const obj);
   void unregisterObject(asIScriptObject* const obj);
   void handle(Event const& e);
+  template<typename T> void queue(Event::ID const typeId, T* obj, asIScriptObject* target);
   void queue(Event const& e);
   void process();
 
@@ -43,5 +45,12 @@ private:
   std::unordered_multimap<int, asIScriptObject*> typeObjectMap;
 
 };
+
+template<typename T>
+void AngelWorksEventBus::queue(Event::ID const typeId, T* obj, asIScriptObject* target)
+{
+  AngelWorksEventWrapper<T>* wrapper = new AngelWorksEventWrapper<T>(obj);
+  queue({typeId, wrapper, target});
+}
 
 #endif

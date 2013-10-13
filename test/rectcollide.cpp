@@ -19,7 +19,7 @@ std::string const INIT_SCRIPT = R"(
     {
       register(@this);
       @o = GlhckService.createSprite(tex, 96, 96);
-      @rect = RectCollideService.createRect(@this, 400, 120, 96, 96, 0, 5, false, true, true);
+      @rect = RectCollideService.createRect(@this, 400, 120, 96, 96, 0, 25, false, true, true);
       o.position = glhck::Vec3(rect.x + rect.w/2, rect.y + rect.h/2, 0);
     }
 
@@ -28,6 +28,22 @@ std::string const INIT_SCRIPT = R"(
       unregister(@this);
     }
 
+    void onRectCollision(RectCollision@ e)
+    {
+      if(@e.b.object == null)
+      {
+        rect.vy = -rect.vy;
+      }
+      else
+      {
+        Sprite@ sprite = cast<Sprite>(e.b.object);
+        if(@sprite != null)
+        {
+          o.material.diffuse = glhck::Color(255, o.position.y, o.position.y, 255);
+        }
+      }
+
+    }
     void onRectCollideServiceDone()
     {
       o.position = glhck::Vec3(rect.x + rect.w/2, rect.y + rect.h/2, 0);
@@ -43,7 +59,10 @@ std::string const INIT_SCRIPT = R"(
     glhck::Texture tex("img/infantry_1.png", imageParameters, textureParameters);
 
     Sprite sprite(@tex);
+    Sprite sprite2(@tex);
+    sprite2.rect.vy = -15;
     RectCollideService.createRect(null, 400, 480, 96, 96, 0, 0, true, false, false);
+    RectCollideService.createRect(null, 400, -96, 96, 96, 0, 0, true, false, false);
   }
 )";
 
@@ -134,7 +153,6 @@ void gameloop(GLFWwindow* window)
 
   AngelWorksState angelWorksState;
   angelWorksState.registerAndRequireService<GlhckService>("glhck");
-  angelWorksState.registerAndRequireService<TimerService>("timer");
   angelWorksState.registerAndRequireService<RectCollideService>("rectcollide");
   angelWorksState.initialize(INIT_SCRIPT);
   engine.addState(0, &angelWorksState);

@@ -1,14 +1,30 @@
 #include "rectcollideservice.h"
 #include <algorithm>
+#include <iostream>
 
 int RectCollideService::RectCollideServiceDone::ID = -1;
+int RectCollideService::RectCollision::ID = -1;
+
+RectCollideService::~RectCollideService()
+{
+  for(CollidableRect* rect : rects)
+  {
+    if(rect->obj)
+    {
+      rect->obj->Release();
+      delete rect;
+    }
+  }
+
+  rects.clear();
+}
 
 void RectCollideService::registerToEngine(asIScriptEngine* e)
 {
   engine = e;
   RectCollideServiceDone::ID = engine->RegisterObjectType("RectCollideServiceDone", sizeof(RectCollideServiceDone), asOBJ_VALUE | asOBJ_POD);
-  //engine->RegisterObjectProperty("TimerEvent", "int timerId", asOFFSET(TimerEvent,timerId));
 
+  RegisterScriptHandle(engine);
   engine->RegisterObjectType("CollidableRect", sizeof(CollidableRect), asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectProperty("CollidableRect", "float x", asOFFSET(CollidableRect,x));
   engine->RegisterObjectProperty("CollidableRect", "float y", asOFFSET(CollidableRect,y));
@@ -19,13 +35,24 @@ void RectCollideService::registerToEngine(asIScriptEngine* e)
   engine->RegisterObjectProperty("CollidableRect", "bool blockable", asOFFSET(CollidableRect,blockable));
   engine->RegisterObjectProperty("CollidableRect", "bool blocking", asOFFSET(CollidableRect,blocking));
   engine->RegisterObjectProperty("CollidableRect", "bool active", asOFFSET(CollidableRect,active));
+  engine->RegisterObjectProperty("CollidableRect", "ref@ object", asOFFSET(CollidableRect,objHandle));
+
+  engine->RegisterEnum("CollisionDirection");
+  engine->RegisterEnumValue("CollisionDirection", "UP", CollisionDirection::UP);
+  engine->RegisterEnumValue("CollisionDirection", "DOWN", CollisionDirection::DOWN);
+  engine->RegisterEnumValue("CollisionDirection", "LEFT", CollisionDirection::LEFT);
+  engine->RegisterEnumValue("CollisionDirection", "RIGHT", CollisionDirection::RIGHT);
+
+  RectCollision::ID = engine->RegisterObjectType("RectCollision", sizeof(RectCollision), asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectProperty("RectCollision", "CollidableRect a", asOFFSET(RectCollision,a));
+  engine->RegisterObjectProperty("RectCollision", "CollidableRect b", asOFFSET(RectCollision,b));
+  engine->RegisterObjectProperty("RectCollision", "CollisionDirection direction", asOFFSET(RectCollision,direction));
 
   engine->RegisterObjectType("RectCollideServiceType", 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod("RectCollideServiceType",
                                "CollidableRect@ createRect(?&in, float, float, float, float, float, float, bool, bool, bool)",
                                asMETHOD(RectCollideService, createRect), asCALL_THISCALL);
 
-  //engine->RegisterObjectMethod("RectCollideServiceType", "void setInterval(?&in, float)", asMETHOD(RectCollideService, setInterval), asCALL_THISCALL);
   engine->RegisterGlobalProperty("RectCollideServiceType RectCollideService", this);
 }
 
@@ -65,14 +92,14 @@ void RectCollideService::process(float delta)
         b.y = b.vy > a.vy ? a.y - a.h : a.y + a.h;
       }
 
-      if(a.active)
+      if(a.active && a.obj != nullptr)
       {
-        // TODO: send collision event
+        eventBus->queue(RectCollision::ID, new RectCollision{a, b, a.vy > b.vy ? UP : DOWN}, a.obj);
       }
 
-      if(b.active)
+      if(b.active && b.obj != nullptr)
       {
-        // TODO: send collision event
+        eventBus->queue(RectCollision::ID, new RectCollision{b, a, b.vy > a.vy ? UP : DOWN}, b.obj);
       }
     }
   }
@@ -111,19 +138,19 @@ void RectCollideService::process(float delta)
         b.x = b.vx > a.vx ? a.x - a.w : a.x + a.w;
       }
 
-      if(a.active)
+      if(a.active && a.obj != nullptr)
       {
-        // TODO: send collision event
+        eventBus->queue(RectCollision::ID, new RectCollision{a, b, a.vx > b.vx ? RIGHT : LEFT}, a.obj);
       }
 
-      if(b.active)
+      if(b.active && b.obj != nullptr)
       {
-        // TODO: send collision event
+        eventBus->queue(RectCollision::ID, new RectCollision{b, a, b.vx > a.vx ? RIGHT : LEFT}, b.obj);
       }
     }
   }
 
-  eventBus->queue({RectCollideServiceDone::ID, new RectCollideServiceDone{}, nullptr});
+  eventBus->queue(RectCollideServiceDone::ID, new RectCollideServiceDone{}, nullptr);
 }
 
 RectCollideService::CollidableRect* RectCollideService::createRect(void* ptr, int typeId, float x, float y, float w, float h,
@@ -143,12 +170,15 @@ RectCollideService::CollidableRect* RectCollideService::createRect(void* ptr, in
     }
   }
 
-  CollidableRect* rect = new CollidableRect{x, y, w, h, vx, vy, blocking, blockable, active, o};
-  rects.push_back(rect);
+  CScriptHandle handle;
   if(o)
   {
     o->AddRef();
+    handle = CScriptHandle(o, o->GetObjectType());
   }
+
+  CollidableRect* rect = new CollidableRect{x, y, w, h, vx, vy, blocking, blockable, active, o, handle};
+  rects.push_back(rect);
 
   return rect;
 }

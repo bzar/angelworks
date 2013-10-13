@@ -46,7 +46,7 @@ void TimerService::process(float delta)
   {
     if(expired(timer))
     {
-      eventBus->queue({TimerEvent::ID, new TimerEvent{timer.id}, timer.obj});
+      eventBus->queue(TimerEvent::ID, new TimerEvent{timer.id}, timer.obj);
       if(timer.repeat)
       {
         timer.start = time;

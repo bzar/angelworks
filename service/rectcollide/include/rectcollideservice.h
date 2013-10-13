@@ -2,6 +2,7 @@
 #define ANGELWORKS_RECTCOLLIDE_SERVICE
 
 #include "angelworksservice.h"
+#include "scripthandle/scripthandle.h"
 #include <vector>
 
 class RectCollideService : public AngelWorksService
@@ -19,6 +20,7 @@ public:
     bool blockable;
     bool active;
     asIScriptObject* obj;
+    CScriptHandle objHandle;
   };
 
   struct RectCollideServiceDone
@@ -26,6 +28,17 @@ public:
     static int ID;
   };
 
+  enum CollisionDirection { UP, DOWN, LEFT, RIGHT };
+
+  struct RectCollision
+  {
+    static int ID;
+    CollidableRect a;
+    CollidableRect b;
+    CollisionDirection direction;
+  };
+
+  ~RectCollideService();
   void registerToEngine(asIScriptEngine* e);
   void process(float delta);
   CollidableRect* createRect(void* ptr, int typeId, float x, float y, float w, float h, float vx, float vy, bool blocking, bool blockable, bool active);

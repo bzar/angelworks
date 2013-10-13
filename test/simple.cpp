@@ -34,10 +34,10 @@ public:
 
   void process(float delta)
   {
-    eventBus->queue({Event1::ID, new Event1{42}, nullptr});
+    eventBus->queue(Event1::ID, new Event1{42}, nullptr);
     for(asIScriptObject* obj : registered)
     {
-      eventBus->queue({Event1::ID, new Event1{7}, obj});
+      eventBus->queue(Event1::ID, new Event1{7}, obj);
     }
   }
 
