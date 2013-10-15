@@ -7,7 +7,7 @@ TimerService::~TimerService()
 {
   for(Timer& timer : timers)
   {
-    timer.obj->Release();
+    timer.objWeakRefFlag->Release();
   }
   timers.clear();
 }
@@ -44,7 +44,13 @@ void TimerService::process(float delta)
 
   for(Timer& timer : timers)
   {
-    if(expired(timer))
+    bool remove = false;
+    timer.objWeakRefFlag->Lock();
+    if(timer.objWeakRefFlag->Get())
+    {
+      remove = true;
+    }
+    else if(expired(timer))
     {
       eventBus->queue(TimerEvent::ID, new TimerEvent{timer.id}, timer.obj);
       if(timer.repeat)
@@ -54,14 +60,28 @@ void TimerService::process(float delta)
       else
       {
         expiredTimers = true;
-        timer.obj->Release();
+        remove = true;
       }
+    }
+
+    if(remove)
+    {
+      timer.objWeakRefFlag->Unlock();
+      timer.objWeakRefFlag->Release();
+      timer.objWeakRefFlag = nullptr;
+      timer.obj = nullptr;
+    }
+    else
+    {
+      timer.objWeakRefFlag->Unlock();
     }
   }
 
-  std::remove_if(timers.begin(), timers.end(), [&expired](Timer& t) {
-    return !t.repeat && expired(t);
+  auto removeIter = std::remove_if(timers.begin(), timers.end(), [&expired](Timer& t) {
+    return t.objWeakRefFlag == nullptr || t.obj == nullptr || (!t.repeat && expired(t));
   });
+
+  timers.erase(removeIter, timers.end());
 }
 
 int TimerService::addTimer(void* ptr, int typeId, float dt, bool repeat)
@@ -70,8 +90,9 @@ int TimerService::addTimer(void* ptr, int typeId, float dt, bool repeat)
   {
     void *obj = *reinterpret_cast<void**>(ptr);
     asIScriptObject* o = static_cast<asIScriptObject*>(obj);
-    Timer timer{o, ++idCounter, time, dt, repeat};
+    asILockableSharedBool* weakRefFlag = engine->GetWeakRefFlagOfScriptObject(o, o->GetObjectType());
+    Timer timer{o, weakRefFlag, ++idCounter, time, dt, repeat};
     timers.push_back(timer);
-    o->AddRef();
+    timer.objWeakRefFlag->AddRef();
   }
 }

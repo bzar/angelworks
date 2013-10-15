@@ -52,14 +52,16 @@ std::string const INIT_SCRIPT = R"(
     glhck::Object@ o;
   }
 
-  void init() {
-    Cube cube;
+  Cube@ cube;
+  Sprite@ sprite;
 
+  void init() {
+    @cube = @Cube();
     glhck::TextureParameters textureParameters = glhck::defaultTextureSpriteParameters();
     glhck::ImportImageParameters imageParameters = glhck::defaultImportImageParameters();
     glhck::Texture tex("img/infantry_1.png", imageParameters, textureParameters);
 
-    Sprite sprite(@tex);
+    @sprite = Sprite(@tex);
   }
 )";
 

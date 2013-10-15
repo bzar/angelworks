@@ -2,6 +2,7 @@
 #define ANGELWORKS_TIMER_SERVICE
 
 #include "angelworksservice.h"
+#include "weakref/weakref.h"
 
 class TimerService : public AngelWorksService
 {
@@ -24,6 +25,7 @@ private:
   struct Timer
   {
     asIScriptObject* obj;
+    asILockableSharedBool* objWeakRefFlag;
     int id;
     float start;
     float interval;
