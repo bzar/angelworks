@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="50" height="30" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" name="tiles" tilewidth="16" tileheight="16">
+  <image source="tiles.png" width="320" height="240"/>
+  <tile id="1">
+   <properties>
+    <property name="lethal" value="1"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="Tile Layer 1" width="50" height="30">
+  <data encoding="base64" compression="zlib">
+   eJztl+EOgCAIhNX3f+j+5OaaTjhOgtZtbtUU+MLAaimlfmRk18+xt+n5jqy+duu9WLR+kLgicKDvU7OOkTN2/dLaYvtlqi6urXNX6/r9KY4msF3veeM61OebdTfyvtLatdQSq41oysgxizcjx0xZOKT1IorQ2hWJo8fSij6uKBwjA4sDPW8xehnCMPpm5QSx9cyB5XzN3FvSfDLP2h7/n6t4JT618zx4EGm/zQwc2j0aSZZ8vMnz9O/JcbpGzJ5Jet6OY+y7aN+SipGPbOMCcJcBQw==
+  </data>
+ </layer>
+ <objectgroup name="Object Layer 1" width="50" height="30">
+  <object type="start" gid="3" x="82" y="283"/>
+  <object type="goal" gid="4" x="32" y="112"/>
+  <object type="block" gid="1" x="592" y="192">
+   <properties>
+    <property name="path" value="path1"/>
+   </properties>
+  </object>
+  <object type="block" gid="1" x="192" y="320">
+   <properties>
+    <property name="path" value="path2"/>
+   </properties>
+  </object>
+  <object name="path2" x="208" y="304">
+   <polyline points="0,0 80,0 0,0"/>
+  </object>
+  <object type="block" gid="1" x="176" y="320">
+   <properties>
+    <property name="path" value="path2"/>
+   </properties>
+  </object>
+  <object type="block" gid="1" x="160" y="320">
+   <properties>
+    <property name="path" value="path2"/>
+   </properties>
+  </object>
+  <object type="block" gid="1" x="144" y="320">
+   <properties>
+    <property name="path" value="path2"/>
+   </properties>
+  </object>
+  <object name="path1" x="592" y="176">
+   <properties>
+    <property name="duration" value="20"/>
+   </properties>
+   <polygon points="0,0 0,48 -96,48 -96,80 -160,80 -160,-112 96,-112 96,0"/>
+  </object>
+  <object type="block" gid="1" x="496" y="464">
+   <properties>
+    <property name="path" value="path3"/>
+   </properties>
+  </object>
+  <object name="path3" x="496" y="448">
+   <polyline points="0,0 -128,0"/>
+  </object>
+  <object type="block" gid="1" x="496" y="448">
+   <properties>
+    <property name="path" value="path3"/>
+   </properties>
+  </object>
+  <object type="block" gid="1" x="496" y="432">
+   <properties>
+    <property name="path" value="path3"/>
+   </properties>
+  </object>
+  <object type="block" gid="1" x="480" y="432">
+   <properties>
+    <property name="path" value="path3"/>
+   </properties>
+  </object>
+  <object type="block" gid="1" x="464" y="432">
+   <properties>
+    <property name="path" value="path3"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>

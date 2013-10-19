@@ -5,10 +5,14 @@ add_subdirectory(lib)
 
 include_directories(
   include
+  ${tmxparser_SOURCE_DIR}/include
 )
+
 
 file(GLOB SOURCES src/*.cpp)
 
 add_library(angelworks-service-tmx
     ${SOURCES}
 )
+
+target_link_libraries(angelworks-service-tmx tmxparser)
