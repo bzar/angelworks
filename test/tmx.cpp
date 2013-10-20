@@ -13,10 +13,49 @@
 #include <iostream>
 
 std::string const INIT_SCRIPT = R"(
+  array<glhck::Object@> objs;
+
+  void setTextureTransform(glhck::Material@ mat, const tmx::Tileset@ tileset, const int tileId) {
+    int tilesPerRow = (tileset.image.width - tileset.margin) / (tileset.tileWidth + tileset.spacing);
+    int row = tileId / tilesPerRow;
+    int col = tileId - tilesPerRow * row;
+    float x = (tileset.margin + col * (tileset.tileWidth + tileset.spacing)) / (tileset.image.width + 0.0);
+    float y = (tileset.margin + row * (tileset.tileHeight + tileset.spacing)) / (tileset.image.height + 0.0);
+    float w = tileset.tileWidth / (tileset.image.width + 0.0);
+    float h = tileset.tileHeight / (tileset.image.height + 0.0);
+    mat.textureOffset = glhck::Vec2(x, 1-y);
+    mat.textureScale = glhck::Vec2(w, h);
+  }
+
   void init() {
     tmx::Map@ map = TmxService.parse("tmx/test.tmx");
 
-    print("Successfully loaded map " + map.filename);
+    array<glhck::Texture@> tilesetTextures;
+
+    for(int i = 0; i < map.numTilesets; ++i) {
+      const tmx::Tileset@ ts = map.getTileset(i);
+      glhck::Texture@ texture = glhck::Texture(map.filepath + ts.image.source, glhck::defaultImportImageParameters(), glhck::defaultTextureSpriteParameters());
+      if(@texture != null) {
+        tilesetTextures.insertLast(texture);
+      } else {
+        print("Failed to load tileset texture!\n");
+      }
+    }
+
+    for(int i = 0; i < map.numLayers; ++i) {
+      for(int y = 0; y < map.getLayer(i).height; ++y) {
+        for(int x = 0; x < map.getLayer(i).width; ++x) {
+          if(map.getLayer(i).getTile(x, y).tilesetId >= 0) {
+            glhck::Texture@ texture = tilesetTextures[map.getLayer(i).getTile(x, y).tilesetId];
+            glhck::Object@ tile = GlhckService.createSprite(texture, 16, 16);
+            tile.position = glhck::Vec3(x*16 + 8, y*16 + 8, 0);
+            setTextureTransform(tile.material, map.getTileset(map.getLayer(i).getTile(x, y).tilesetId), map.getLayer(i).getTile(x, y).id);
+            objs.insertLast(tile);
+          }
+        }
+      }
+    }
+    print("Successfully loaded map " + map.filename + "\n");
   }
 )";
 
@@ -117,7 +156,7 @@ void gameloop(GLFWwindow* window)
   engine.run();
 
   double t0 = glfwGetTime();
-  while(engine.isRunning() && glfwGetTime() - t0 < 1)
+  while(engine.isRunning() && glfwGetTime() - t0 < 3)
   {
     engine.advance(1.0f/60.0f);
   }

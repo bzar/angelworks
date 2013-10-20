@@ -13,6 +13,7 @@ file(GLOB SOURCES src/*.cpp)
 
 add_library(angelworks-service-tmx
     ${SOURCES}
+    ${AS_ADDONS}/scriptarray/scriptarray.cpp
 )
 
 target_link_libraries(angelworks-service-tmx tmxparser)

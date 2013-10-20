@@ -125,6 +125,8 @@ int anglhck::registerToEngine(asIScriptEngine *engine)
   engine->RegisterObjectMethod("Material", "float get_shininess()", asFUNCTION(glhckMaterialGetShininess), asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod("Material", "void set_textureOffset(const Vec2 &in)", asFUNCTION(glhckMaterialTextureOffset), asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod("Material", "const Vec2& get_textureOffset()", asFUNCTION(glhckMaterialGetTextureOffset), asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod("Material", "void set_textureScale(const Vec2 &in)", asFUNCTION(glhckMaterialTextureScale), asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod("Material", "const Vec2& get_textureScale()", asFUNCTION(glhckMaterialGetTextureScale), asCALL_CDECL_OBJFIRST);
 
   engine->RegisterObjectType("Object", 0, asOBJ_REF);
   engine->RegisterObjectBehaviour("Object", asBEHAVE_ADDREF, "void f()", asFUNCTION(glhckObjectRef), asCALL_CDECL_OBJFIRST);
