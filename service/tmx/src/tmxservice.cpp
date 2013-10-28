@@ -107,7 +107,7 @@ void TmxService::registerToEngine(asIScriptEngine* engine)
   engine->RegisterObjectMethod("ObjectGroup", "const string& get_name() const", asMETHOD(Tmx::ObjectGroup, GetName), asCALL_THISCALL);
   engine->RegisterObjectMethod("ObjectGroup", "int get_width() const", asMETHOD(Tmx::ObjectGroup, GetWidth), asCALL_THISCALL);
   engine->RegisterObjectMethod("ObjectGroup", "int get_height() const", asMETHOD(Tmx::ObjectGroup, GetHeight), asCALL_THISCALL);
-  engine->RegisterObjectMethod("ObjectGroup", "const Object@ getObject(int)", asMETHOD(Tmx::ObjectGroup, GetObject), asCALL_THISCALL);
+  engine->RegisterObjectMethod("ObjectGroup", "const Object@ getObject(int) const", asMETHOD(Tmx::ObjectGroup, GetObject), asCALL_THISCALL);
   engine->RegisterObjectMethod("ObjectGroup", "int get_numObjects() const", asMETHOD(Tmx::ObjectGroup, GetNumObjects), asCALL_THISCALL);
   engine->RegisterObjectMethod("ObjectGroup", "int get_visibility() const", asMETHOD(Tmx::ObjectGroup, GetVisibility), asCALL_THISCALL);
   engine->RegisterObjectMethod("ObjectGroup", "const PropertySet@ get_properties() const", asMETHOD(Tmx::ObjectGroup, GetProperties), asCALL_THISCALL);

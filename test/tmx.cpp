@@ -13,8 +13,6 @@
 #include <iostream>
 
 std::string const INIT_SCRIPT = R"(
-  array<glhck::Object@> objs;
-
   void setTextureTransform(glhck::Material@ mat, const tmx::Tileset@ tileset, const int tileId) {
     int tilesPerRow = (tileset.image.width - tileset.margin) / (tileset.tileWidth + tileset.spacing);
     int row = tileId / tilesPerRow;
@@ -27,8 +25,10 @@ std::string const INIT_SCRIPT = R"(
     mat.textureScale = glhck::Vec2(w, h);
   }
 
-  void init() {
-    tmx::Map@ map = TmxService.parse("tmx/test.tmx");
+  array<glhck::Object@> objs;
+
+  void loadMap(const string &in filename) {
+    tmx::Map@ map = TmxService.parse(filename);
 
     array<glhck::Texture@> tilesetTextures;
 
@@ -45,17 +45,37 @@ std::string const INIT_SCRIPT = R"(
     for(int i = 0; i < map.numLayers; ++i) {
       for(int y = 0; y < map.getLayer(i).height; ++y) {
         for(int x = 0; x < map.getLayer(i).width; ++x) {
-          if(map.getLayer(i).getTile(x, y).tilesetId >= 0) {
-            glhck::Texture@ texture = tilesetTextures[map.getLayer(i).getTile(x, y).tilesetId];
+          tmx::MapTile mapTile = map.getLayer(i).getTile(x, y);
+          if(mapTile.tilesetId >= 0) {
+            glhck::Texture@ texture = tilesetTextures[mapTile.tilesetId];
             glhck::Object@ tile = GlhckService.createSprite(texture, 16, 16);
             tile.position = glhck::Vec3(x*16 + 8, y*16 + 8, 0);
-            setTextureTransform(tile.material, map.getTileset(map.getLayer(i).getTile(x, y).tilesetId), map.getLayer(i).getTile(x, y).id);
+            setTextureTransform(tile.material, map.getTileset(mapTile.tilesetId), mapTile.id);
             objs.insertLast(tile);
           }
         }
       }
     }
+
+    for(int i = 0; i < map.numObjectGroups; ++i) {
+      for(int j = 0; j < map.getObjectGroup(i).numObjects; ++j) {
+        const tmx::Object@ object = map.getObjectGroup(i).getObject(j);
+        if(object.gid != 0) {
+          const int tilesetIndex = map.findTilesetIndex(object.gid);
+          const tmx::Tileset@ tileset = map.findTileset(object.gid);
+          glhck::Texture@ texture = tilesetTextures[tilesetIndex];
+          glhck::Object@ tile = GlhckService.createSprite(texture, 16, 16);
+          tile.position = glhck::Vec3(object.x - 8, object.y - 8, 0);
+          setTextureTransform(tile.material, tileset, object.gid - tileset.firstGid);
+          objs.insertLast(tile);
+        }
+      }
+    }
     print("Successfully loaded map " + map.filename + "\n");
+  }
+
+  void init() {
+    loadMap("tmx/test.tmx");
   }
 )";
 
